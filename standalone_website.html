@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Public Complaint Management System (PCMS) - Modern AI-powered Citizen Portal with Live Tracking & Officer Dashboard">
+    <title>PCMS — Public Complaint Management System Portal</title>
+    
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ── CSS Tokens & Design System ─────────────────────────────────── */
+        :root {
+            --primary: #2563EB;
+            --primary-light: #3B82F6;
+            --primary-dark: #1D4ED8;
+            --primary-subtle: rgba(37, 99, 235, 0.1);
+            --secondary: #10B981;
+            --secondary-dark: #059669;
+            --secondary-subtle: rgba(16, 185, 129, 0.1);
+            --warning: #F59E0B;
+            --warning-subtle: rgba(245, 158, 11, 0.12);
+            --accent: #F43F5E;
+            --accent-subtle: rgba(244, 63, 94, 0.1);
+            --info: #0EA5E9;
+            --info-subtle: rgba(14, 165, 233, 0.12);
+
+            --bg-deep: #F8FAFC;
+            --bg-card: #FFFFFF;
+            --bg-glass: rgba(255, 255, 255, 0.88);
+            --bg-glass-hover: rgba(255, 255, 255, 0.98);
+
+            --text-primary: #0F172A;
+            --text-secondary: #475569;
+            --text-muted: #64748B;
+            --border-glass: #E2E8F0;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+            --shadow-lg: 0 16px 36px rgba(0,0,0,0.12);
+
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --radius-full: 9999px;
+            --font-main: 'Plus Jakarta Sans', 'Noto Sans Tamil', sans-serif;
+        }
+
+        [data-theme="dark"] {
+            --bg-deep: #0B0F19;
+            --bg-card: #111827;
+            --bg-glass: rgba(17, 24, 39, 0.85);
+            --bg-glass-hover: rgba(30, 41, 59, 0.95);
+            --text-primary: #F9FAFB;
+            --text-secondary: #CBD5E1;
+            --text-muted: #94A3B8;
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+            --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+            --shadow-lg: 0 16px 40px rgba(0,0,0,0.5);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html, body {
+            height: 100vh;
+            overflow: hidden;
+            font-family: var(--font-main);
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Ambient Mesh Background */
+        .bg-mesh {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
+        }
+        .bg-mesh::before, .bg-mesh::after {
+            content: ''; position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.2;
+            animation: meshFloat 18s ease-in-out infinite alternate;
+        }
+        .bg-mesh::before { width: 600px; height: 600px; background: var(--primary-light); top: -150px; right: -100px; }
+        .bg-mesh::after { width: 500px; height: 500px; background: var(--secondary); bottom: -150px; left: -100px; animation-delay: -9s; }
+
+        @keyframes meshFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-40px, 40px) scale(1.1); }
+        }
+
+        /* Top Navigation Bar */
+        .navbar {
+            height: 68px;
+            padding: 0 28px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-glass);
+            display: flex; align-items: center; justify-content: space-between;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+        }
+        .brand {
+            display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.35rem; color: var(--text-primary); text-decoration: none;
+        }
+        .brand-logo {
+            width: 42px; height: 42px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;
+            box-shadow: 0 4px 14px rgba(37,99,235,0.3);
+        }
+
+        .nav-links { display: flex; align-items: center; gap: 8px; list-style: none; }
+        .nav-link {
+            padding: 9px 18px; border-radius: var(--radius-full); font-size: 0.92rem; font-weight: 600;
+            color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease; text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .nav-link:hover { color: var(--primary); background: var(--primary-subtle); }
+        .nav-link.active { color: var(--primary); background: var(--primary-subtle); font-weight: 700; }
+
+        .nav-actions { display: flex; align-items: center; gap: 10px; }
+        .btn-icon {
+            width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border-glass);
+            background: var(--bg-card); color: var(--text-primary); cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all 0.2s ease;
+        }
+        .btn-icon:hover { transform: scale(1.05); border-color: var(--primary-light); }
+
+        .lang-btn {
+            padding: 8px 16px; border-radius: var(--radius-full); border: 1px solid var(--border-glass);
+            background: var(--bg-card); color: var(--primary); font-weight: 700; font-size: 0.85rem; cursor: pointer;
+        }
+
+        /* Single Page Viewport Container */
+        .spa-viewport {
+            margin-top: 68px; height: calc(100vh - 68px); position: relative; overflow: hidden;
+        }
+        .view-panel {
+            position: absolute; inset: 0; opacity: 0; visibility: hidden; pointer-events: none;
+            transform: translateY(16px); transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto; padding: 24px; display: flex; flex-direction: column;
+        }
+        .view-panel.active { opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0); z-index: 10; }
+
+        .container { max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        /* UI Components */
+        .glass-card {
+            background: var(--bg-glass); border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg); padding: 28px; box-shadow: var(--shadow-md); backdrop-filter: blur(12px);
+        }
+
+        .btn {
+            padding: 12px 24px; border-radius: var(--radius-full); font-weight: 700; font-size: 0.95rem;
+            cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 10px; transition: all 0.2s ease;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; box-shadow: 0 4px 16px rgba(37,99,235,0.35); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37,99,235,0.45); }
+        .btn-secondary { background: linear-gradient(135deg, var(--secondary), var(--secondary-dark)); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border-glass); color: var(--text-primary); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* Category Tiles */
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-top: 16px; }
+        .category-card {
+            background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: var(--radius-md);
+            padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; gap: 10px;
+        }
+        .category-card:hover { transform: translateY(-4px); border-color: var(--primary-light); box-shadow: var(--shadow-sm); }
+        .cat-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; }
+
+        /* Chatbot Interface */
+        .chat-box { height: 100%; display: flex; flex-direction: column; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-glass); background: var(--bg-card); }
+        .chat-header { padding: 16px 24px; background: var(--bg-glass); border-bottom: 1px solid var(--border-glass); display: flex; align-items: center; justify-content: space-between; }
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+        .message { max-width: 80%; padding: 14px 18px; border-radius: 18px; line-height: 1.5; font-size: 0.95rem; }
+        .message.bot { background: var(--primary-subtle); color: var(--text-primary); border-bottom-left-radius: 4px; align-self: flex-start; }
+        .message.user { background: var(--primary); color: white; border-bottom-right-radius: 4px; align-self: flex-end; }
+
+        .chat-input-row { padding: 16px 20px; background: var(--bg-glass); border-top: 1px solid var(--border-glass); display: flex; gap: 10px; }
+        .form-input { flex: 1; padding: 12px 18px; border-radius: var(--radius-full); border: 1px solid var(--border-glass); background: var(--bg-deep); color: var(--text-primary); font-size: 0.95rem; outline: none; }
+        .form-input:focus { border-color: var(--primary-light); }
+
+        /* Progress Steps */
+        .progress-bar-steps { display: flex; justify-content: space-between; margin: 24px 0; position: relative; }
+        .step-item { display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 2; flex: 1; text-align: center; }
+        .step-icon-box { width: 44px; height: 44px; border-radius: 50%; background: var(--bg-deep); border: 2px solid var(--border-glass); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .step-item.active .step-icon-box { border-color: var(--primary); background: var(--primary); color: white; box-shadow: 0 0 16px rgba(37,99,235,0.4); }
+        .step-item.completed .step-icon-box { border-color: var(--secondary); background: var(--secondary); color: white; }
+
+        .badge { padding: 5px 12px; border-radius: var(--radius-full); font-size: 0.78rem; font-weight: 700; text-transform: uppercase; }
+        .badge-pending { background: var(--warning-subtle); color: var(--warning); }
+        .badge-in_progress { background: var(--info-subtle); color: var(--info); }
+        .badge-resolved { background: var(--secondary-subtle); color: var(--secondary); }
+
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        .data-table th, .data-table td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--border-glass); font-size: 0.9rem; }
+        .data-table th { background: var(--bg-deep); color: var(--text-muted); font-weight: 700; }
+
+        .fab-btn {
+            position: fixed; bottom: 24px; right: 24px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; padding: 14px 24px; border-radius: var(--radius-full); font-weight: 700; border: none; cursor: pointer;
+            box-shadow: 0 8px 24px rgba(37,99,235,0.4); display: flex; align-items: center; gap: 10px; z-index: 90; transition: all 0.2s ease;
+        }
+        .fab-btn:hover { transform: translateY(-3px) scale(1.03); }
+    </style>
+</head>
+<body>
+    <div class="bg-mesh"></div>
+
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <a href="#" onclick="showTab('home')" class="brand">
+            <div class="brand-logo"><i class="fa-solid fa-landmark-dome"></i></div>
+            <span>PCMS</span>
+        </a>
+
+        <ul class="nav-links">
+            <li><a class="nav-link active" data-tab="home" onclick="showTab('home')"><i class="fa-solid fa-house"></i> <span id="txt-home">Home</span></a></li>
+            <li><a class="nav-link" data-tab="chatbot" onclick="showTab('chatbot')"><i class="fa-solid fa-robot"></i> <span id="txt-file">File Complaint</span></a></li>
+            <li><a class="nav-link" data-tab="track" onclick="showTab('track')"><i class="fa-solid fa-magnifying-glass"></i> <span id="txt-track">Track Status</span></a></li>
+            <li><a class="nav-link" data-tab="dashboard" onclick="showTab('dashboard')"><i class="fa-solid fa-gauge-high"></i> <span id="txt-dash">My Dashboard</span></a></li>
+            <li><a class="nav-link" data-tab="admin" onclick="showTab('admin')"><i class="fa-solid fa-user-shield"></i> <span id="txt-admin">Officer Panel</span></a></li>
+        </ul>
+
+        <div class="nav-actions">
+            <button class="lang-btn" id="langBtn" onclick="toggleLanguage()">தமிழ்</button>
+            <button class="btn-icon" onclick="toggleTheme()" title="Toggle Theme"><i class="fa-solid fa-moon"></i></button>
+        </div>
+    </nav>
+
+    <!-- Master Single Page Viewport -->
+    <div class="spa-viewport">
+
+        <!-- ════ VIEW 1: HOME OVERVIEW ════ -->
+        <div class="view-panel active" id="view-home">
+            <div class="container">
+                <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 32px; align-items: center; min-height: calc(100vh - 120px);">
+                    <div>
+                        <div style="display: inline-flex; align-items: center; gap: 8px; background: var(--primary-subtle); color: var(--primary); padding: 6px 16px; border-radius: var(--radius-full); font-size: 0.85rem; font-weight: 700; margin-bottom: 16px;">
+                            <i class="fa-solid fa-shield-halved"></i> Official Citizen Complaint Portal
+                        </div>
+                        <h1 style="font-size: 3rem; font-weight: 800; line-height: 1.15; margin-bottom: 16px;">
+                            <span id="title1">Your Voice</span><br>
+                            <span style="background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" id="title2">Matters Most</span>
+                        </h1>
+                        <p style="color: var(--text-secondary); font-size: 1.1rem; line-height: 1.6; margin-bottom: 28px;" id="hero-sub">
+                            File public complaints effortlessly using AI Assistant. Attach photos, GPS location, and receive real-time resolution updates directly from municipal departments.
+                        </p>
+                        <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+                            <button onclick="showTab('chatbot')" class="btn btn-primary"><i class="fa-solid fa-robot"></i> <span id="btn-file-now">File Complaint Now</span></button>
+                            <button onclick="showTab('track')" class="btn btn-secondary"><i class="fa-solid fa-magnifying-glass"></i> <span id="btn-track-now">Track Complaint</span></button>
+                            <button onclick="showTab('admin')" class="btn btn-outline"><i class="fa-solid fa-user-shield"></i> Officer Portal</button>
+                        </div>
+                    </div>
+
+                    <!-- Category Quick Filing Card -->
+                    <div class="glass-card">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                            <h3 style="font-size: 1.1rem; font-weight: 800;"><i class="fa-solid fa-bolt" style="color: var(--warning);"></i> 1-Click Fast Filing / விரைவு புகார்</h3>
+                            <span class="badge badge-resolved"><i class="fa-solid fa-check"></i> AI Direct</span>
+                        </div>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 14px;">Click any department tile to immediately launch complaint chatbot:</p>
+                        <div class="category-grid">
+                            <div class="category-card" onclick="quickFile('Sanitation & Solid Waste')">
+                                <div class="cat-icon" style="background: linear-gradient(135deg, #10B981, #059669);"><i class="fa-solid fa-trash-can"></i></div>
+                                <span style="font-size: 0.82rem; font-weight: 700;">Sanitation</span>
+                            </div>
+                            <div class="category-card" onclick="quickFile('Water Supply & Sewage')">
+                                <div class="cat-icon" style="background: linear-gradient(135deg, #0EA5E9, #0284C7);"><i class="fa-solid fa-droplet"></i></div>
+                                <span style="font-size: 0.82rem; font-weight: 700;">Water Board</span>
+                            </div>
+                            <div class="category-card" onclick="quickFile('Roads & Potholes')">
+                                <div class="cat-icon" style="background: linear-gradient(135deg, #F59E0B, #D97706);"><i class="fa-solid fa-road"></i></div>
+                                <span style="font-size: 0.82rem; font-weight: 700;">Roads</span>
+                            </div>
+                            <div class="category-card" onclick="quickFile('Street Lights & Electricity')">
+                                <div class="cat-icon" style="background: linear-gradient(135deg, #8B5CF6, #7C3AED);"><i class="fa-solid fa-lightbulb"></i></div>
+                                <span style="font-size: 0.82rem; font-weight: 700;">Electricity</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════ VIEW 2: AI CHATBOT FILING ════ -->
+        <div class="view-panel" id="view-chatbot">
+            <div class="container" style="height: 100%;">
+                <div class="chat-box">
+                    <div class="chat-header">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 18px;"><i class="fa-solid fa-robot"></i></div>
+                            <div>
+                                <h3 style="font-size: 1rem; font-weight: 800;">PCMS AI Assistant</h3>
+                                <span style="font-size: 0.75rem; color: var(--secondary); font-weight: 600;">● Online • Tamil & English AI</span>
+                            </div>
+                        </div>
+                        <button onclick="resetChat()" class="btn btn-outline" style="padding: 6px 14px; font-size: 0.8rem;"><i class="fa-solid fa-rotate-right"></i> Reset Chat</button>
+                    </div>
+
+                    <div class="chat-messages" id="chatList"></div>
+
+                    <div class="chat-input-row">
+                        <input type="text" class="form-input" id="chatInput" placeholder="Describe your issue or type here..." onkeydown="if(event.key==='Enter') sendUserMsg()">
+                        <button class="btn btn-primary" onclick="sendUserMsg()"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════ VIEW 3: LIVE TRACKING ════ -->
+        <div class="view-panel" id="view-track">
+            <div class="container" style="max-width: 800px;">
+                <div class="glass-card text-center" style="margin-bottom: 24px;">
+                    <div style="width: 60px; height: 60px; background: var(--info-subtle); color: var(--info); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 12px;">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i>
+                    </div>
+                    <h2 style="font-weight: 800; font-size: 1.6rem;" id="track-head">Track Complaint Status</h2>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px;" id="track-sub">Enter your Complaint ID to check real-time resolution timeline</p>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <input type="text" class="form-input" id="trackIdInput" value="PCMS-2026-TEST99" placeholder="e.g. PCMS-2026-TEST99" onkeydown="if(event.key==='Enter') searchComplaint()">
+                        <button class="btn btn-primary" onclick="searchComplaint()"><i class="fa-solid fa-magnifying-glass"></i> Track</button>
+                    </div>
+                </div>
+
+                <!-- Track Result Display -->
+                <div class="glass-card" id="trackCard">
+                    <div class="progress-bar-steps">
+                        <div class="step-item completed" id="st-submitted">
+                            <div class="step-icon-box"><i class="fa-solid fa-file-circle-check"></i></div>
+                            <span style="font-size: 0.8rem; font-weight: 700;">Submitted</span>
+                        </div>
+                        <div class="step-item completed" id="st-assigned">
+                            <div class="step-icon-box"><i class="fa-solid fa-user-gear"></i></div>
+                            <span style="font-size: 0.8rem; font-weight: 700;">Assigned</span>
+                        </div>
+                        <div class="step-item active" id="st-progress">
+                            <div class="step-icon-box"><i class="fa-solid fa-spinner"></i></div>
+                            <span style="font-size: 0.8rem; font-weight: 700;">In Progress</span>
+                        </div>
+                        <div class="step-item" id="st-resolved">
+                            <div class="step-icon-box"><i class="fa-solid fa-circle-check"></i></div>
+                            <span style="font-size: 0.8rem; font-weight: 700;">Resolved</span>
+                        </div>
+                    </div>
+
+                    <!-- Official Reply Box -->
+                    <div style="background: var(--secondary-subtle); border-left: 4px solid var(--secondary); padding: 14px 18px; border-radius: 10px; margin: 16px 0;" id="govtReplyBox">
+                        <div style="font-weight: 800; color: var(--secondary-dark); font-size: 0.9rem; margin-bottom: 4px;">
+                            <i class="fa-solid fa-shield-halved"></i> Official Government Response / அதிகாரப்பூர்வ பதில்:
+                        </div>
+                        <p style="font-size: 0.9rem; font-weight: 600;" id="govtReplyText">Electrical Inspection Team assigned. Replacement bulb repair in progress.</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 0.9rem; border-top: 1px solid var(--border-glass); padding-top: 16px;">
+                        <div><strong style="color: var(--text-muted);">Complaint ID:</strong> <span id="dispId" style="color: var(--primary); font-weight: 800;">PCMS-2026-TEST99</span></div>
+                        <div><strong style="color: var(--text-muted);">Status:</strong> <span class="badge badge-in_progress" id="dispStatus">In Progress</span></div>
+                        <div><strong style="color: var(--text-muted);">Title:</strong> <span id="dispTitle">Broken Street Light & Cable Leak</span></div>
+                        <div><strong style="color: var(--text-muted);">Department:</strong> <span id="dispDept">Street Lights & Electricity</span></div>
+                        <div><strong style="color: var(--text-muted);">Location:</strong> <span id="dispLoc">Anna Salai Main Junction, Chennai</span></div>
+                        <div><strong style="color: var(--text-muted);">Priority:</strong> <span id="dispPriority" style="color: var(--accent); font-weight: 700;">High</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════ VIEW 4: MY DASHBOARD ════ -->
+        <div class="view-panel" id="view-dashboard">
+            <div class="container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div>
+                        <h2 style="font-weight: 800;">My Complaints Dashboard</h2>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Welcome back, <strong>Citizen User</strong></p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showTab('chatbot')"><i class="fa-solid fa-plus-circle"></i> File New Complaint</button>
+                </div>
+
+                <table class="data-table glass-card">
+                    <thead>
+                        <tr>
+                            <th>Complaint ID</th>
+                            <th>Title</th>
+                            <th>Department</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dashTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ════ VIEW 5: OFFICER PANEL ════ -->
+        <div class="view-panel" id="view-admin">
+            <div class="container">
+                <div class="glass-card" style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h2 style="font-weight: 800;"><i class="fa-solid fa-user-shield" style="color: var(--primary);"></i> Department Officer Control Panel</h2>
+                            <p style="color: var(--text-secondary); font-size: 0.88rem;">Manage public complaints, update status & send official replies</p>
+                        </div>
+                        <span class="badge badge-resolved">Logged as Admin (admin@pcms.gov.in)</span>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 16px;">Active Complaints List</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                                <th>Update Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab-btn" onclick="showTab('chatbot')"><i class="fa-solid fa-robot"></i> <span>File Complaint</span></button>
+
+    <!-- Application Script -->
+    <script>
+        // Store
+        let complaints = [
+            { id: 'PCMS-2026-TEST99', title: 'Broken Street Light & Cable Leak', dept: 'Street Lights & Electricity', priority: 'High', status: 'in_progress', reply: 'Electrical Inspection Team assigned. Replacement bulb & repair in progress.', loc: 'Anna Salai Main Junction, Chennai' },
+            { id: 'PCMS-2026-99A12B', title: 'Garbage Dump near Market Gate', dept: 'Sanitation & Waste', priority: 'Medium', status: 'pending', reply: 'Complaint logged. Team assigned for morning cleanup.', loc: 'Main Market Road, Chennai' }
+        ];
+
+        let currentLang = 'en';
+
+        const i18n = {
+            en: {
+                home: 'Home', file: 'File Complaint', track: 'Track Status', dash: 'My Dashboard', admin: 'Officer Panel',
+                title1: 'Your Voice', title2: 'Matters Most', heroSub: 'File public complaints effortlessly using AI Assistant. Attach photos, GPS location, and receive real-time updates directly from city departments.',
+                btnFile: 'File Complaint Now', btnTrack: 'Track Complaint', trackHead: 'Track Complaint Status', trackSub: 'Enter your Complaint ID to check real-time resolution timeline'
+            },
+            ta: {
+                home: 'முகப்பு', file: 'புகார் பதிவு', track: 'புகார் கண்காணிப்பு', dash: 'என் பலகை', admin: 'அதிகாரி பகுதி',
+                title1: 'உங்கள் குரல்', title2: 'மிகவும் முக்கியம்', heroSub: 'எங்கள் AI சாட்பாட் மூலம் எளிதாக பொதுப் புகார்களைப் பதிவு செய்யுங்கள். இருப்பிடத்தைப் பகிர்ந்து நிகழ்நேரத்தில் நிலையை கண்காணிக்கவும்.',
+                btnFile: 'புகார் பதிவு செய்', btnTrack: 'புகார் கண்காணிப்பு', trackHead: 'புகார் நிலை கண்காணிப்பு', trackSub: 'உங்கள் புகார் எண் உள்ளிட்டு நிலையை அறியவும்'
+            }
+        };
+
+        function showTab(tabId) {
+            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+
+            const targetView = document.getElementById(`view-${tabId}`);
+            const targetLink = document.querySelector(`.nav-link[data-tab="${tabId}"]`);
+
+            if (targetView) targetView.classList.add('active');
+            if (targetLink) targetLink.classList.add('active');
+
+            if (tabId === 'dashboard') renderDashTable();
+            if (tabId === 'admin') renderAdminTable();
+        }
+
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ta' : 'en';
+            document.getElementById('langBtn').textContent = currentLang === 'en' ? 'தமிழ்' : 'English';
+            
+            const t = i18n[currentLang];
+            document.getElementById('txt-home').textContent = t.home;
+            document.getElementById('txt-file').textContent = t.file;
+            document.getElementById('txt-track').textContent = t.track;
+            document.getElementById('txt-dash').textContent = t.dash;
+            document.getElementById('txt-admin').textContent = t.admin;
+            document.getElementById('title1').textContent = t.title1;
+            document.getElementById('title2').textContent = t.title2;
+            document.getElementById('hero-sub').textContent = t.heroSub;
+            document.getElementById('btn-file-now').textContent = t.btnFile;
+            document.getElementById('btn-track-now').textContent = t.btnTrack;
+            document.getElementById('track-head').textContent = t.trackHead;
+            document.getElementById('track-sub').textContent = t.trackSub;
+        }
+
+        function quickFile(category) {
+            showTab('chatbot');
+            addBotMsg(`Hello! I see you want to file a complaint regarding <strong>${category}</strong>. Please describe the problem in detail:`);
+        }
+
+        function sendUserMsg() {
+            const input = document.getElementById('chatInput');
+            const txt = input.value.trim();
+            if (!txt) return;
+
+            addUserMsg(txt);
+            input.value = '';
+
+            setTimeout(() => {
+                const newId = 'PCMS-2026-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+                complaints.unshift({
+                    id: newId, title: txt, dept: 'Sanitation & Waste', priority: 'Medium', status: 'pending',
+                    reply: 'Complaint registered via AI Assistant. Inspection assigned.', loc: 'Chennai Zone'
+                });
+                addBotMsg(`Thank you! Your complaint has been registered successfully.<br><strong>Complaint ID: ${newId}</strong><br>Status: Pending assignment.`);
+            }, 800);
+        }
+
+        function addUserMsg(txt) {
+            const div = document.createElement('div');
+            div.className = 'message user';
+            div.innerHTML = txt;
+            document.getElementById('chatList').appendChild(div);
+            scrollChat();
+        }
+
+        function addBotMsg(txt) {
+            const div = document.createElement('div');
+            div.className = 'message bot';
+            div.innerHTML = txt;
+            document.getElementById('chatList').appendChild(div);
+            scrollChat();
+        }
+
+        function scrollChat() {
+            const list = document.getElementById('chatList');
+            list.scrollTop = list.scrollHeight;
+        }
+
+        function resetChat() {
+            document.getElementById('chatList').innerHTML = '';
+            addBotMsg("Hello! I am your PCMS AI Assistant. How can I help you file a complaint today? (உங்களுக்கு எவ்வாறு உதவ வேண்டும்?)");
+        }
+
+        function searchComplaint() {
+            const id = document.getElementById('trackIdInput').value.trim();
+            const found = complaints.find(c => c.id.toUpperCase() === id.toUpperCase());
+
+            if (found) {
+                document.getElementById('dispId').textContent = found.id;
+                document.getElementById('dispTitle').textContent = found.title;
+                document.getElementById('dispDept').textContent = found.dept;
+                document.getElementById('dispLoc').textContent = found.loc;
+                document.getElementById('dispPriority').textContent = found.priority;
+                document.getElementById('dispStatus').textContent = found.status;
+                document.getElementById('govtReplyText').textContent = found.reply || 'Under review.';
+                
+                const s1 = document.getElementById('st-submitted');
+                const s2 = document.getElementById('st-assigned');
+                const s3 = document.getElementById('st-progress');
+                const s4 = document.getElementById('st-resolved');
+
+                [s1,s2,s3,s4].forEach(s=>s.className='step-item');
+                if (found.status === 'pending') { s1.classList.add('completed'); s2.classList.add('active'); }
+                else if (found.status === 'in_progress') { s1.classList.add('completed'); s2.classList.add('completed'); s3.classList.add('active'); }
+                else if (found.status === 'resolved') { s1.classList.add('completed'); s2.classList.add('completed'); s3.classList.add('completed'); s4.classList.add('completed'); }
+            } else {
+                alert('Complaint ID not found!');
+            }
+        }
+
+        function renderDashTable() {
+            const tbody = document.getElementById('dashTableBody');
+            tbody.innerHTML = complaints.map(c => `
+                <tr>
+                    <td style="font-family: monospace; font-weight: 800; color: var(--primary);">${c.id}</td>
+                    <td>${c.title}</td>
+                    <td>${c.dept}</td>
+                    <td><span style="font-weight: 700;">${c.priority}</span></td>
+                    <td><span class="badge badge-${c.status}">${c.status}</span></td>
+                    <td><button class="btn btn-outline" style="padding: 4px 12px; font-size: 0.78rem;" onclick="document.getElementById('trackIdInput').value='${c.id}'; showTab('track'); searchComplaint();">Track</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderAdminTable() {
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = complaints.map(c => `
+                <tr>
+                    <td style="font-family: monospace; font-weight: 800; color: var(--primary);">${c.id}</td>
+                    <td>${c.title}</td>
+                    <td>${c.dept}</td>
+                    <td><span class="badge badge-${c.status}">${c.status}</span></td>
+                    <td>
+                        <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="updateStatus('${c.id}', 'resolved')">Resolve</button>
+                        <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem;" onclick="updateStatus('${c.id}', 'in_progress')">In Progress</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStatus(id, newStatus) {
+            const item = complaints.find(c => c.id === id);
+            if (item) {
+                item.status = newStatus;
+                item.reply = newStatus === 'resolved' ? 'Official resolution verified & complaint closed by officer.' : 'Action in progress by field team.';
+                renderAdminTable();
+                alert(`Status for ${id} updated to ${newStatus}!`);
+            }
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            resetChat();
+            searchComplaint();
+        });
+    </script>
+</body>
+</html>
